@@ -43,17 +43,16 @@ Patient Name: {triage_data.name}
 Age: {triage_data.age}
 Symptoms: {triage_data.symptoms}
 
-You are a professional medical triage assistant.
-Provide a concise, clear, and safe advice for the patient.
+You are a professional medical expert. Analyze the patient's symptoms and provide a triage assessment.
+Provide concise, clear, and best advice for the patient.
 Keep it short and easy to understand.
-Avoid dangerous or misleading suggestions.
 Respond as a helpful human medical assistant.
 """
 
-    # Run ollama subprocess asynchronously
+    # Run ollama subprocess asynchronously with TinyLlama
     try:
         process = await asyncio.create_subprocess_exec(
-            "ollama", "run", "medllama2",
+            "ollama", "run", "tinyllama",  # Changed model name here
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -78,7 +77,6 @@ Respond as a helpful human medical assistant.
                 if not line:
                     break
                 yield line.decode()
-            # Also log and yield any stderr output if needed
             stderr = await process.stderr.read()
             if stderr:
                 logging.warning(f"Ollama stderr: {stderr.decode().strip()}")
@@ -103,3 +101,8 @@ def internal_server_error_handler(request, exc):
         status_code=500,
         content={"message": "Internal server error. Please try again later."}
     )
+@app.get("/api/health")
+def health_check():
+    return {"status": "ok"}
+
+
